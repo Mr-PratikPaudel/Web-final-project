@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Delete Event — EventFlow{% endblock %}
+
+{% block content %}
+<div class="container page-wrapper">
+    <div style="max-width:500px; margin:4rem auto; text-align:center;">
+        <div style="font-size:3.5rem; margin-bottom:1.5rem; opacity:0.5;">⚠</div>
+        <h1 style="margin-bottom:0.75rem;">Delete Event</h1>
+        <p style="color:var(--text-muted); margin-bottom:0.5rem; font-size:0.95rem;">You are about to permanently delete:</p>
+        <p style="font-family:'Cormorant Garamond',serif; font-size:1.4rem; font-weight:600; color:var(--gold); margin-bottom:0.75rem;">"{{ event.title }}"</p>
+        <p style="color:var(--red); font-size:0.85rem; margin-bottom:2rem;">This action cannot be undone. All bookings for this event will also be deleted.</p>
+
+        <div style="display:flex; gap:1rem; justify-content:center;">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-lg">Yes, Delete Event</button>
+            </form>
+            <a href="{% url 'event_detail' event.pk %}" class="btn btn-outline btn-lg">Keep Event</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

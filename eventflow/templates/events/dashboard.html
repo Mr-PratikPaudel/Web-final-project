@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — EventFlow{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
+    @media(max-width:600px) { .stats-row { grid-template-columns: 1fr; } }
+
+    .section-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+    .section-title {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.7rem;
+        color: var(--gold);
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+    }
+
+    .event-row {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.1rem 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s;
+    }
+    .event-row:hover { border-color: var(--border-hover); }
+    .event-row-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--text);
+        flex: 1;
+    }
+    .event-row-title:hover { color: var(--gold); }
+    .event-row-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .event-row-actions { display: flex; gap: 0.5rem; }
+
+    .discover-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    @media(max-width:700px) { .discover-grid { grid-template-columns: 1fr; } }
+
+    .mini-event-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        text-decoration: none;
+        display: block;
+        transition: all 0.2s;
+    }
+    .mini-event-card:hover { border-color: rgba(201,168,76,0.3); transform:translateY(-1px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-wrapper">
+    <div class="page-header">
+        <div>
+            <div class="page-eyebrow">Welcome back</div>
+            <h1>{{ user.get_full_name|default:user.username }}</h1>
+        </div>
+        <a href="{% url 'event_create' %}" class="btn btn-primary">+ Create Event</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <span class="stat-number">{{ stats.total_events }}</span>
+            <span class="stat-label">Events Created</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ stats.total_bookings }}</span>
+            <span class="stat-label">Active Bookings</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ stats.upcoming }}</span>
+            <span class="stat-label">Upcoming Events</span>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;" class="dashboard-grid">
+        <!-- My Events -->
+        <div>
+            <div class="section-header">
+                <span class="section-title">My Events</span>
+                <a href="{% url 'event_create' %}" class="btn btn-ghost btn-sm">+ New</a>
+            </div>
+
+            {% if my_events %}
+            {% for event in my_events %}
+            <div class="event-row">
+                <div style="flex:1; min-width:0;">
+                    <a href="{% url 'event_detail' event.pk %}" class="event-row-title">{{ event.title }}</a>
+                    <div class="event-row-meta">{{ event.start_date|date:"M d, Y" }} · {{ event.booking_count }} booked</div>
+                </div>
+                <span class="badge badge-{{ event.status }}">{{ event.get_status_display }}</span>
+                <div class="event-row-actions">
+                    <a href="{% url 'event_edit' event.pk %}" class="btn btn-ghost btn-sm">✏</a>
+                    <a href="{% url 'event_delete' event.pk %}" class="btn btn-ghost btn-sm" style="color:var(--red)">✕</a>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state" style="padding:3rem 1rem;">
+                <div class="empty-icon" style="font-size:2rem;">📅</div>
+                <h3 style="font-size:1.1rem;">No events yet</h3>
+                <p style="font-size:0.82rem;">Create your first event and start selling tickets.</p>
+                <a href="{% url 'event_create' %}" class="btn btn-primary btn-sm">Create Event</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- My Bookings -->
+        <div>
+            <div class="section-header">
+                <span class="section-title">My Bookings</span>
+                <a href="{% url 'my_bookings' %}" class="btn btn-ghost btn-sm">View All</a>
+            </div>
+
+            {% if my_bookings %}
+            {% for booking in my_bookings|slice:":5" %}
+            <div class="event-row">
+                <div style="flex:1; min-width:0;">
+                    <a href="{% url 'event_detail' booking.event.pk %}" class="event-row-title">{{ booking.event.title }}</a>
+                    <div class="event-row-meta">{{ booking.event.start_date|date:"M d" }} · {{ booking.seats }} seat{{ booking.seats|pluralize }} · REF: {{ booking.booking_reference }}</div>
+                </div>
+                <span class="badge badge-confirmed">✓ Confirmed</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state" style="padding:3rem 1rem;">
+                <div class="empty-icon" style="font-size:2rem;">🎟</div>
+                <h3 style="font-size:1.1rem;">No bookings yet</h3>
+                <p style="font-size:0.82rem;">Explore upcoming events below.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if upcoming_events %}
+    <hr class="divider">
+    <div class="section-header" style="margin-top:2rem;">
+        <span class="section-title">Discover Upcoming Events</span>
+        <a href="{% url 'event_list' %}" class="btn btn-ghost btn-sm">See All →</a>
+    </div>
+    <div class="discover-grid">
+        {% for event in upcoming_events %}
+        <a href="{% url 'event_detail' event.pk %}" class="mini-event-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+                <span class="badge badge-upcoming" style="font-size:0.65rem;">{{ event.category.icon|default:"🎯" }} {{ event.category.name|default:"Event" }}</span>
+                <span style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; color:var(--gold);">{% if event.price == 0 %}Free{% else %}${{ event.price }}{% endif %}</span>
+            </div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; margin-bottom:0.35rem;">{{ event.title }}</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">{{ event.start_date|date:"M d, Y" }} · {{ event.city }}</div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    @media(max-width:768px) { .dashboard-grid { grid-template-columns: 1fr !important; } }
+</style>
+{% endblock %}

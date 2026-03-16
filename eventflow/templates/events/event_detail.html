@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }} — EventFlow{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 2rem;
+        align-items: start;
+    }
+    @media(max-width:900px) { .detail-grid { grid-template-columns: 1fr; } }
+
+    .event-hero {
+        padding: 3rem 0 2rem;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    .back-link {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        margin-bottom: 1.5rem;
+        font-family: 'DM Mono', monospace;
+        transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--gold); }
+
+    .event-main-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 600;
+        line-height: 1.1;
+        margin-bottom: 1.25rem;
+    }
+
+    .event-tags { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    .info-item {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+    }
+    .info-item-label {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.35rem;
+    }
+    .info-item-value { font-size: 0.9rem; color: var(--text); }
+
+    .booking-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.75rem;
+        position: sticky; top: 84px;
+    }
+    .price-display {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: var(--gold);
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+    .price-display small { font-family: 'Outfit', sans-serif; font-size: 0.8rem; color: var(--text-muted); font-weight: 300; }
+
+    .seats-progress {
+        margin: 1.25rem 0;
+        padding: 1rem;
+        background: var(--bg2);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+    }
+    .seats-bar-lg { height: 6px; background: var(--bg3); border-radius: 3px; margin: 0.5rem 0; overflow: hidden; }
+    .seats-fill-lg { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px; transition: width 1s ease; }
+
+    .description-section { margin: 2rem 0; }
+    .description-section h3 {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.7rem;
+        color: var(--gold);
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-bottom: 1rem;
+    }
+    .description-text { font-size: 0.95rem; color: var(--text-muted); line-height: 1.8; white-space: pre-wrap; }
+
+    .organizer-block {
+        display: flex; align-items: center; gap: 1rem;
+        padding: 1rem;
+        background: var(--bg2);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        margin-top: 1.5rem;
+    }
+    .organizer-avatar {
+        width: 44px; height: 44px;
+        background: var(--gold-dim);
+        border: 1px solid rgba(201,168,76,0.3);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.8rem;
+        color: var(--gold);
+        flex-shrink: 0;
+    }
+
+    .confirmed-booking {
+        background: rgba(82,198,126,0.08);
+        border: 1px solid rgba(82,198,126,0.25);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        margin: 1rem 0;
+        text-align: center;
+    }
+    .confirmed-ref {
+        font-family: 'DM Mono', monospace;
+        font-size: 1.1rem;
+        color: var(--green);
+        letter-spacing: 0.15em;
+        margin: 0.35rem 0;
+    }
+
+    .action-bar {
+        display: flex; gap: 0.75rem;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="event-hero">
+        <a href="{% url 'event_list' %}" class="back-link">← Back to events</a>
+
+        <div class="event-tags">
+            <span class="badge badge-{{ event.status }}">
+                {% if event.status == 'upcoming' %}◆{% elif event.status == 'ongoing' %}●{% else %}○{% endif %}
+                {{ event.get_status_display }}
+            </span>
+            {% if event.category %}
+            <span class="badge badge-gold">{{ event.category.icon }} {{ event.category.name }}</span>
+            {% endif %}
+            {% if event.price == 0 %}
+            <span class="badge badge-confirmed">Free Entry</span>
+            {% endif %}
+        </div>
+
+        <h1 class="event-main-title">{{ event.title }}</h1>
+
+        <div style="display:flex; gap:2rem; flex-wrap:wrap; color:var(--text-muted); font-size:0.85rem;">
+            <span> {{ event.start_date|date:"l, F d, Y · g:i A" }}</span>
+            <span> {{ event.venue }}, {{ event.city }}</span>
+            <span>👥 {{ event.booking_count }} registered</span>
+        </div>
+    </div>
+
+    <div class="detail-grid page-wrapper" style="padding-top:0;">
+        <!-- Main Content -->
+        <div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-item-label">Start Date & Time</div>
+                    <div class="info-item-value">{{ event.start_date|date:"M d, Y · g:i A" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">End Date & Time</div>
+                    <div class="info-item-value">{{ event.end_date|date:"M d, Y · g:i A" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Venue</div>
+                    <div class="info-item-value">{{ event.venue }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">City</div>
+                    <div class="info-item-value">{{ event.city }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Total Capacity</div>
+                    <div class="info-item-value">{{ event.capacity }} seats</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Available Seats</div>
+                    <div class="info-item-value" >
+                        {{ event.available_seats }} remaining
+                    </div>
+                </div>
+            </div>
+
+            <div class="description-section">
+                <h3>About this event</h3>
+                <p class="description-text">{{ event.description }}</p>
+            </div>
+
+            <hr class="divider">
+
+            <div class="organizer-block">
+                <div class="organizer-avatar">{{ event.organizer.username|slice:":2"|upper }}</div>
+                
+                    

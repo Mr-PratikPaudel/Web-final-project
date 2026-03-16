@@ -1,0 +1,361 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}EventFlow{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg2: #111118;
+            --bg3: #18181f;
+            --surface: #1e1e28;
+            --surface2: #252530;
+            --border: rgba(255,255,255,0.08);
+            --border-hover: rgba(255,255,255,0.18);
+            --gold: #c9a84c;
+            --gold-light: #e8c97a;
+            --gold-dim: rgba(201,168,76,0.15);
+            --text: #f0eee8;
+            --text-muted: #8a8898;
+            --text-dim: #4a4a58;
+            --accent: #7c6fcd;
+            --accent-light: #a897e8;
+            --red: #e05252;
+            --green: #52c67e;
+            --radius: 12px;
+            --radius-lg: 20px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* NAV */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10,10,15,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+        }
+
+        .nav-brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--gold);
+            text-decoration: none;
+            letter-spacing: 0.05em;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        .nav-brand span { color: var(--text-muted); font-weight: 300; font-size: 1rem; font-family: 'DM Mono', monospace; }
+
+        .nav-links { display: flex; align-items: center; gap: 0.25rem; }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 400;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-links a:hover { color: var(--text); background: var(--surface); }
+        .nav-links a.active { color: var(--gold); }
+
+        .nav-user {
+            display: flex; align-items: center; gap: 1rem;
+            font-size: 0.85rem; color: var(--text-muted);
+        }
+
+        .avatar {
+            width: 34px; height: 34px;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--gold);
+            letter-spacing: 0.05em;
+        }
+
+        /* LAYOUT */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        .page-wrapper { padding: 2.5rem 0 4rem; }
+
+        /* TYPOGRAPHY */
+        h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: 1.2; }
+        h1 { font-size: clamp(2rem, 4vw, 3rem); }
+        h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+        h3 { font-size: 1.3rem; }
+
+        .page-header {
+            margin-bottom: 2.5rem;
+            display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .page-title-group { }
+        .page-eyebrow {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--gold);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 1.4rem;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: 1px solid transparent;
+            font-family: 'Outfit', sans-serif;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: #0a0a0f;
+            border-color: var(--gold);
+        }
+        .btn-primary:hover { background: var(--gold-light); border-color: var(--gold-light); transform: translateY(-1px); box-shadow: 0 8px 25px rgba(201,168,76,0.3); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border-color: var(--border-hover);
+        }
+        .btn-outline:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border-color: transparent;
+        }
+        .btn-ghost:hover { color: var(--text); background: var(--surface); }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--red);
+            border-color: rgba(224,82,82,0.3);
+        }
+        .btn-danger:hover { background: rgba(224,82,82,0.1); border-color: var(--red); }
+
+        .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.78rem; }
+        .btn-lg { padding: 0.85rem 2rem; font-size: 0.95rem; }
+
+        /* CARDS */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+
+        .card-body { padding: 1.5rem; }
+
+        /* FORMS */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-control:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
+        .form-control::placeholder { color: var(--text-dim); }
+        select.form-control { cursor: pointer; }
+        textarea.form-control { resize: vertical; min-height: 100px; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .badge-upcoming { background: rgba(124,111,205,0.15); color: var(--accent-light); border: 1px solid rgba(124,111,205,0.3); }
+        .badge-ongoing { background: rgba(82,198,126,0.15); color: var(--green); border: 1px solid rgba(82,198,126,0.3); }
+        .badge-completed { background: rgba(138,136,152,0.1); color: var(--text-muted); border: 1px solid var(--border); }
+        .badge-cancelled { background: rgba(224,82,82,0.1); color: var(--red); border: 1px solid rgba(224,82,82,0.3); }
+        .badge-confirmed { background: rgba(82,198,126,0.15); color: var(--green); border: 1px solid rgba(82,198,126,0.3); }
+        .badge-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+
+        /* ALERTS / MESSAGES */
+        .messages-container { padding: 1rem 2rem 0; }
+        .alert {
+            padding: 0.85rem 1.25rem;
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+            font-size: 0.88rem;
+            display: flex; align-items: center; gap: 0.75rem;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .alert-success { background: rgba(82,198,126,0.1); border: 1px solid rgba(82,198,126,0.3); color: var(--green); }
+        .alert-error, .alert-danger { background: rgba(224,82,82,0.1); border: 1px solid rgba(224,82,82,0.3); color: var(--red); }
+        .alert-info { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); }
+
+        /* DIVIDER */
+        .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+        /* MONO TEXT */
+        .mono { font-family: 'DM Mono', monospace; }
+
+        /* GRID */
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; }
+
+        /* STAT CARDS */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stat-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            font-weight: 600;
+            color: var(--gold);
+            line-height: 1;
+            display: block;
+        }
+        .stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; font-family: 'DM Mono', monospace; }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.4; }
+        .empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--text); margin-bottom: 0.5rem; }
+        .empty-state p { font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .events-grid { grid-template-columns: 1fr; }
+            .page-header { flex-direction: column; align-items: flex-start; }
+            nav { padding: 0 1rem; }
+            .container { padding: 0 1rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <a href="{% url 'event_list' %}" class="nav-brand">
+            EventFlow <span>/ 2025</span>
+        </a>
+
+        <div class="nav-links">
+            <a href="{% url 'event_list' %}">Discover</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'event_create' %}">+ New Event</a>
+            <a href="{% url 'my_bookings' %}">My Bookings</a>
+            {% endif %}
+        </div>
+
+        <div class="nav-user">
+            {% if user.is_authenticated %}
+                <span style="font-size:0.82rem; color:var(--text-muted)">{{ user.get_full_name|default:user.username }}</span>
+                <div class="avatar">{{ user.username|slice:":2"|upper }}</div>
+                <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm">Out</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Join</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <span>{% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% else %}→{% endif %}</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(el => {
+                el.style.transition = 'opacity 0.5s, transform 0.5s';
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-8px)';
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 4000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
